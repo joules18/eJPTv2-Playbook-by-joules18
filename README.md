@@ -77,7 +77,7 @@ Este repositorio contiene un **playbook HTML interactivo y standalone** para pre
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-> 📸 Puedes ver el playbook en vivo en: `https://TU_USUARIO.github.io/eJPTv2-Playbook`
+> 📸 Puedes ver el playbook en vivo en: `https://joules18.github.io/eJPTv2-Playbook`
 
 ---
 
